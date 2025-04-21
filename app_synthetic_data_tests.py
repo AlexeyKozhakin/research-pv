@@ -261,7 +261,7 @@ df_payments['d'] = pd.to_datetime(df_payments['date'], errors='coerce')
 
 # 📌 Выбор пользователя
 # Популярные user_ids
-default_user_ids = [1, 2, 3, 4, 5, 6, 7]
+default_user_ids = [1, 2, 3, 4, 5, 6, 7, 8,9]
 options = default_user_ids + ["Other"]
 
 # Выбор из списка
