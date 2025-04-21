@@ -244,7 +244,7 @@ def predict_pv_exp_full(data_one_user):
     
     data_one_user = get_red_line_exp_dec(data_one_user)
     #result = predict_player_full_info(data_one_user)
-    result = {"pv0_90": data_one_user['red'].max()/2, "pv0_90_b": data_one_user['red'].max()/2, "pv0_max": data_one_user['red'].max()/2}
+    result = {"pv0_90": data_one_user['red'].max()*0.5, "pv0_90_b": data_one_user['red'].max()*0.5, "pv0_max": data_one_user['red'].max()*0.5}
     return result
 
 def predict_pv_net_dep_true(data_one_user):
@@ -261,7 +261,7 @@ df_payments['d'] = pd.to_datetime(df_payments['date'], errors='coerce')
 
 # 📌 Выбор пользователя
 # Популярные user_ids
-default_user_ids = [1, 2, 3, 4]
+default_user_ids = [1, 2, 3, 4, 5, 6, 7]
 options = default_user_ids + ["Other"]
 
 # Выбор из списка
@@ -328,11 +328,11 @@ if st.button("🔁 Run Calculation"):
     if show_pv_m:
         data = get_column_pv(data)
         ax2.plot(data['d'], data['player_value_pv0_max'], color='m', label='PV Model Max', linewidth=LINE_WIDTH)
-    if show_pv_t:
-        data = get_column_pv_true(data)
-        ax2.plot(data['d'], data['player_value_pv0_90'], color='g', label='True PV Q90', linestyle='--', linewidth=LINE_WIDTH)
-        ax2.plot(data['d'], data['player_value_pv0_90_b'], color='g', label='True PV Q90 Bound', linestyle=':', linewidth=LINE_WIDTH)
-        ax2.plot(data['d'], data['player_value_pv0_max'], color='g', label='True PV Max', linewidth=LINE_WIDTH)
+    # if show_pv_t:
+    #     data = get_column_pv_true(data)
+    #     ax2.plot(data['d'], data['player_value_pv0_90'], color='g', label='True PV Q90', linestyle='--', linewidth=LINE_WIDTH)
+    #     ax2.plot(data['d'], data['player_value_pv0_90_b'], color='g', label='True PV Q90 Bound', linestyle=':', linewidth=LINE_WIDTH)
+    #     ax2.plot(data['d'], data['player_value_pv0_max'], color='g', label='True PV Max', linewidth=LINE_WIDTH)
 
     ax1.set_title("All Lines", fontsize=TITLE_FONTSIZE)
     ax1.set_xlabel("Date")
@@ -346,13 +346,15 @@ if st.button("🔁 Run Calculation"):
     st.subheader("🔵 Red/Blue Net Dep & Exp Decay")
     fig2, ax = plt.subplots(figsize=(14, 5))
     if show_true_blue:
-        ax.plot(true_model['date'], true_model['blue'], c='navy', label='Net Dep Blue')
+        ax.plot(true_model['date'], true_model['blue'], c='blue', linestyle='--', label='Net Dep Blue', linewidth=LINE_WIDTH+2)
     if show_true_red:
-        ax.plot(true_model['date'], true_model['red'], c='deeppink', label='Net Dep Red')
+        #pass
+        ax.plot(true_model['date'], true_model['red'], c='red', linestyle='--', label='Net Dep Red', linewidth=LINE_WIDTH)
     if show_exp_blue:
-        ax.plot(exp_model['date'], exp_model['blue'], c='blue', label='Exp Decay Blue')
+        ax.plot(exp_model['date'], exp_model['blue'], c='blue', label='Exp Decay Blue', linewidth=LINE_WIDTH)
     if show_exp_red:
-        ax.plot(exp_model['date'], exp_model['red'], c='red', label='Exp Decay Red')
+        #pass
+        ax.plot(exp_model['date'], exp_model['red'], c='red', label='Exp Decay Red', linewidth=LINE_WIDTH)
     ax.set_title("Net Dep & Exp Decay Lines")
     ax.set_xlabel("Date")
     ax.set_ylabel("Value")
@@ -364,9 +366,9 @@ if st.button("🔁 Run Calculation"):
     st.subheader("💰 Deposits and Withdrawals")
     fig3, ax = plt.subplots(figsize=(14, 4))
     if show_deposits:
-        ax.vlines(data['d'], ymin=0, ymax=data['sum_of_deposits'], color='green', alpha=0.6, label='Deposits')
+        ax.vlines(data['d'], ymin=0, ymax=data['sum_of_deposits'], color='green', alpha=0.6, label='Deposits', linewidth=LINE_WIDTH)
     if show_withdrawals:
-        ax.vlines(data['d'], ymin=-data['sum_of_withdrawals'], ymax=0, color='orange', alpha=0.6, label='Withdrawals')
+        ax.vlines(data['d'], ymin=-data['sum_of_withdrawals'], ymax=0, color='orange', alpha=0.6, label='Withdrawals', linewidth=LINE_WIDTH)
     ax.set_title("Deposits / Withdrawals")
     ax.set_xlabel("Date")
     ax.legend()
@@ -378,12 +380,12 @@ if st.button("🔁 Run Calculation"):
     fig4, ax = plt.subplots(figsize=(14, 5))
     if show_pv_m:
         data = get_column_pv(data)
-        ax.plot(data['d'], data['player_value_pv0_max'], color='m', label='Model PV Max')
-    if show_pv_t:
-        data = get_column_pv_true(data)
-        ax.plot(data['d'], data['player_value_pv0_90'], color='g', linestyle='--', label='True PV Q90')
-        ax.plot(data['d'], data['player_value_pv0_90_b'], color='g', linestyle=':', label='True PV Q90 Bound')
-        ax.plot(data['d'], data['player_value_pv0_max'], color='g', label='True PV Max')
+        ax.plot(data['d'], data['player_value_pv0_max'], color='m', label='Model PV Max', linewidth=LINE_WIDTH)
+    # if show_pv_t:
+    #     data = get_column_pv_true(data)
+    #     ax.plot(data['d'], data['player_value_pv0_90'], color='g', linestyle='--', label='True PV Q90')
+    #     ax.plot(data['d'], data['player_value_pv0_90_b'], color='g', linestyle=':', label='True PV Q90 Bound')
+    #     ax.plot(data['d'], data['player_value_pv0_max'], color='g', label='True PV Max')
     ax.set_title("Player Value Lines")
     ax.set_xlabel("Date")
     ax.legend()

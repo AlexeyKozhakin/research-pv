@@ -30,11 +30,54 @@ manual_cases4 = [
     {'user_id': 4, 'date': '2024-02-28', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0}
 ]
 
+
+manual_cases5 = [
+    {'user_id': 5, 'date': '2024-01-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 5, 'date': '2024-02-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 5, 'date': '2024-03-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+
+    {'user_id': 5, 'date': '2025-01-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 5, 'date': '2025-02-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 5, 'date': '2025-03-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},        
+]
+
+manual_cases6 = [
+    {'user_id': 6, 'date': '2023-01-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2023-02-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2023-03-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},
+
+    {'user_id': 6, 'date': '2024-01-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2024-02-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2024-03-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},        
+
+    {'user_id': 6, 'date': '2025-01-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2025-02-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 6, 'date': '2025-03-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},        
+]
+
+manual_cases7 = [
+    {'user_id': 7, 'date': '2023-01-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2023-02-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2023-03-01', 'sum_of_deposits': 10.0, 'sum_of_withdrawals': 0.0},
+
+    {'user_id': 7, 'date': '2024-01-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2024-02-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2024-03-01', 'sum_of_deposits': 100.0, 'sum_of_withdrawals': 0.0},        
+
+    {'user_id': 7, 'date': '2025-01-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2025-02-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},
+    {'user_id': 7, 'date': '2025-03-01', 'sum_of_deposits': 1000.0, 'sum_of_withdrawals': 0.0},        
+]
+
+
 manual_cases = (
     manual_cases1 +
     manual_cases2+
     manual_cases3+
-    manual_cases4
+    manual_cases4+
+    manual_cases5+
+    manual_cases6+
+    manual_cases7
                ) 
 
 
