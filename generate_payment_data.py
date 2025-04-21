@@ -18,10 +18,10 @@ def generate_event_dates(start_date, max_days, event_days_count):
     return dates
 
 # функция для генерации сумм по логнормальному распределению с рандомными параметрами
-def generate_amounts(size, mu_range=(4, 6), sigma_range=(0.3, 0.8)):
+def generate_amounts(size, mu_range=(1, 500), sigma_range=(5, 50)):
     mu = np.random.uniform(*mu_range)
     sigma = np.random.uniform(*sigma_range)
-    amounts = np.random.lognormal(mean=mu, sigma=sigma, size=size)
+    amounts = np.abs(np.random.normal(loc=mu, scale=sigma, size=size))
     return amounts
 
 # список для накопления всех записей
@@ -38,8 +38,8 @@ for user_id in range(1, num_users + 1):
         records.append({
             'user_id': user_id,
             'date': date,
-            'sum_of_deposit': round(amount, 2),
-            'sum_of_withdraw': 0.0
+            'sum_of_deposits': round(amount, 2),
+            'sum_of_withdrawals': 0.0
         })
 
     # выводы
@@ -51,8 +51,9 @@ for user_id in range(1, num_users + 1):
         records.append({
             'user_id': user_id,
             'date': date,
-            'sum_of_deposit': 0.0,
-            'sum_of_withdraw': round(amount, 2)
+            'sum_of_deposits': 0.0,
+            'sum_of_withdrawals': round(amount, 2)
+            #'sum_of_withdrawals': 0.0
         })
 
 # сборка в DataFrame
@@ -60,8 +61,8 @@ df = pd.DataFrame(records)
 
 # агрегация по user_id и дате, чтобы объединить суммы на совпадающие даты
 df = df.groupby(['user_id', 'date'], as_index=False).agg({
-    'sum_of_deposit': 'sum',
-    'sum_of_withdraw': 'sum'
+    'sum_of_deposits': 'sum',
+    'sum_of_withdrawals': 'sum'
 })
 
 # сортировка по user_id и дате
