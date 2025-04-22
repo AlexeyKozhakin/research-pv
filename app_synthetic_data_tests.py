@@ -190,6 +190,7 @@ def get_red_line_exp_dec(data_one_user):
     df['net_dep_cum_sum'] = df['net_dep'].cumsum()
 
     # Преобразуем даты в массив
+
     dates = df['d'].values.astype('datetime64[D]')
     date_diff_matrix = (dates[:, None] - dates[None, :]).astype('timedelta64[D]').astype(int)
 
@@ -382,21 +383,21 @@ def predict_pv_exp_full(data_one_user):
     
     #res = blue_last if blue_last<data_one_user['red'].max()/2 else data_one_user['red'].max()/2
     #res = data_one_user['red'].max()/2
-    local_maxs = simple_local_maxim_sl(data_one_user, column='blue')
+    # local_maxs = simple_local_maxim_sl(data_one_user, column='blue')
 
-    idx_max = data_one_user['blue'].idxmax()
+    # idx_max = data_one_user['blue'].idxmax()
 
-    values = data_one_user.iloc[idx_max:]['blue'].values
+    # values = data_one_user.iloc[idx_max:]['blue'].values
 
-    alpha = 1.05  # можно варьировать: чем больше alpha, тем больше вес у конца
-    weights = alpha ** np.arange(len(values))
+    # alpha = 1.05  # можно варьировать: чем больше alpha, тем больше вес у конца
+    # weights = alpha ** np.arange(len(values))
 
-    weighted_avg = np.sum(values * weights) / np.sum(weights)
+    # weighted_avg = np.sum(values * weights) / np.sum(weights)
 
-    res = weighted_avg/2
+    # res = weighted_avg/2
     #res = (data_one_user.iloc[idx_max:]['blue'] + local_maxs.iloc[idx_max+1:]['blue'].max()/2)/2
-    result = {"pv0_90": res, "pv0_90_b": res, "pv0_max": res}
-    #result = {"pv0_90": data_one_user['red'].max()*0.5, "pv0_90_b": data_one_user['red'].max()*0.5, "pv0_max": data_one_user['red'].max()*0.5}
+    #result = {"pv0_90": res, "pv0_90_b": res, "pv0_max": res}
+    result = {"pv0_90": data_one_user['red'].max()*0.5, "pv0_90_b": data_one_user['red'].max()*0.5, "pv0_max": data_one_user['red'].max()*0.5}
     return result
 
 def predict_pv_net_dep_true(data_one_user):
@@ -413,7 +414,7 @@ df_payments['d'] = pd.to_datetime(df_payments['date'], errors='coerce')
 
 # 📌 Выбор пользователя
 # Популярные user_ids
-default_user_ids = [1, 2, 3, 4, 5, 55, 555, 6,60, 600, 7, 8, 9, 10, 11]
+default_user_ids = [1, 2, 3, 4, 5, 55, 555, 6, 60, 600, 7, 8, 9, 10, 11]
 options = default_user_ids + ["Other"]
 
 # Выбор из списка
