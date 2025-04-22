@@ -12,7 +12,38 @@ LINE_WIDTH = 3
 
 
 #utils
-import pandas as pd
+def simple_local_maxima(df, column='blue'):
+    """
+    Находит локальные максимумы в столбце, включая последнюю точку,
+    если она больше предыдущей и положительная.
+
+    Условие: red[i] > red[i-1] и red[i] > red[i+1] и red[i] > 0
+    Для последней точки: red[-1] > red[-2] и red[-1] > 0
+
+    :param df: DataFrame с колонками ['date', column]
+    :param column: имя числового столбца
+    :return: DataFrame с колонками ['date', 'local_max']
+    """
+    values = df[column].values
+    dates = df['date'].values
+    local_max = []
+    dates_max = []
+
+    for i in range(1, len(values) - 1):
+        if (
+            values[i] > values[i - 1]
+            and values[i] > values[i + 1]
+            and values[i] > 0
+        ):
+            local_max.append(values[i])
+            dates_max.append(dates[i])
+
+    # Проверка последней точки
+    if len(values) >= 2 and values[-1] > values[-2] and values[-1] > 0:
+        local_max.append(values[-1])
+        dates_max.append(dates[-1])
+
+    return pd.DataFrame({'date': dates_max, 'local_max': local_max})
 
 def get_column_pv(data_one_user, modes=['pv0_90', 'pv0_90_b', 'pv0_max']):
 
@@ -239,12 +270,133 @@ def get_red_line_adapt_exp_dec(data_one_user):
     data_one_user['date'] = pd.to_datetime(data_one_user['d'])
     return df
 
+def exp_decay(x_inp):
+    x_input = x_inp.copy()
+        # Преобразуем даты в массив
+    dates = x_input['date'].values.astype('datetime64[D]')
+    date_diff_matrix = (dates[:, None] - dates[None, :]).astype('timedelta64[D]').astype(int)
+
+    # Мы хотим только те, где i <= j (прошлое к текущему)
+    mask = date_diff_matrix >= 0
+
+    # Параметр затухания
+    tau = 60
+
+    # Вычисляем веса затухания
+    decay_weights = np.exp(-date_diff_matrix / tau) * mask
+
+    # Вектор net_dep
+    blue_line = x_input['blue'].values
+
+    # Вычисляем экспоненциально-взвешенную сумму
+    blue_line_exp = decay_weights @ blue_line
+
+    x_input['blue_line_exp'] = blue_line_exp
+    return x_input
+
+
+def simple_local_maxim_sl(df, column='blue'):
+    """
+    Находит локальные максимумы в столбце, включая последнюю точку,
+    если она больше предыдущей и положительная.
+
+    Условие: red[i] > red[i-1] и red[i] > red[i+1] и red[i] > 0
+    Для последней точки: red[-1] > red[-2] и red[-1] > 0
+
+    :param df: DataFrame с колонками ['date', column]
+    :param column: имя числового столбца
+    :return: DataFrame с колонками ['date', 'local_max']
+    """
+    values = df[column].values
+    dates = df['date'].values
+    local_max = []
+    dates_max = []
+
+    for i in range(1, len(values) - 1):
+        if (
+            values[i] > values[i - 1]
+            and values[i] > values[i + 1]
+            and values[i] > 0
+        ):
+            local_max.append(values[i])
+            dates_max.append(dates[i])
+
+    # Проверка последней точки
+    if len(values) >= 2 and values[-1] > values[-2] and values[-1] > 0:
+        local_max.append(values[-1])
+        dates_max.append(dates[-1])
+
+    return pd.DataFrame({'date': dates_max, 'local_max': local_max})
+
+
 
 def predict_pv_exp_full(data_one_user):
+    def compute_custom_value(data_one_user):
+        blue = data_one_user['blue'].values
+
+        # Индекс максимального значения
+        idx_max = blue.argmax()
+
+        # Значения после максимума (если они есть)
+        values_after_max = blue[idx_max + 1:]  # без самого максимума
+
+        if len(values_after_max) > 0:
+            avg_after = values_after_max.mean()
+        else:
+            avg_after = 0  # если после максимума ничего нет
+
+        res = (0.5 * blue.max() + 0.5 * avg_after)/2
+        return res
     
     data_one_user = get_red_line_exp_dec(data_one_user)
     #result = predict_player_full_info(data_one_user)
-    result = {"pv0_90": data_one_user['red'].max()*0.5, "pv0_90_b": data_one_user['red'].max()*0.5, "pv0_max": data_one_user['red'].max()*0.5}
+    local_max = simple_local_maxima(data_one_user, column='blue')
+    #res = (local_max['local_max'].mean()+1.25*local_max['local_max'].std())/2
+    #res = local_max['local_max'].mean()
+    #res = data_one_user[data_one_user['blue']>0]['blue'].mean()/2
+    #res = compute_custom_value(data_one_user)
+    #res = data_one_user['red'].max()/2
+    # Найдём индекс максимума
+    idx_max = data_one_user['blue'].idxmax()
+
+    # Даты: t1 — дата максимума, t2 — последняя дата
+    t1 = pd.to_datetime(data_one_user.loc[idx_max, 'date'])
+    t2 = pd.to_datetime(data_one_user.iloc[-1]['date'])
+
+    # Разница в днях
+    dt = (t2 - t1).days
+
+    # Вес затухания
+    w = np.exp(-dt / 60)
+
+    # Максимум blue
+    blue_max = data_one_user['blue'].max()
+
+    # Последнее значение blue
+    #blue_last = data_one_user.iloc[-1]['blue']
+    blue_last = data_one_user.iloc[idx_max:]['blue'].mean()
+    blue_last = max(blue_last, 0)  # исключаем отрицательные
+
+    # Формула результата
+    #res = w * blue_max / 2 + (1 - w) * blue_last / 2
+    
+    #res = blue_last if blue_last<data_one_user['red'].max()/2 else data_one_user['red'].max()/2
+    #res = data_one_user['red'].max()/2
+    local_maxs = simple_local_maxim_sl(data_one_user, column='blue')
+
+    idx_max = data_one_user['blue'].idxmax()
+
+    values = data_one_user.iloc[idx_max:]['blue'].values
+
+    alpha = 1.05  # можно варьировать: чем больше alpha, тем больше вес у конца
+    weights = alpha ** np.arange(len(values))
+
+    weighted_avg = np.sum(values * weights) / np.sum(weights)
+
+    res = weighted_avg/2
+    #res = (data_one_user.iloc[idx_max:]['blue'] + local_maxs.iloc[idx_max+1:]['blue'].max()/2)/2
+    result = {"pv0_90": res, "pv0_90_b": res, "pv0_max": res}
+    #result = {"pv0_90": data_one_user['red'].max()*0.5, "pv0_90_b": data_one_user['red'].max()*0.5, "pv0_max": data_one_user['red'].max()*0.5}
     return result
 
 def predict_pv_net_dep_true(data_one_user):
@@ -261,7 +413,7 @@ df_payments['d'] = pd.to_datetime(df_payments['date'], errors='coerce')
 
 # 📌 Выбор пользователя
 # Популярные user_ids
-default_user_ids = [1, 2, 3, 4, 5, 6, 7, 8,9]
+default_user_ids = [1, 2, 3, 4, 5, 55, 555, 6,60, 600, 7, 8, 9, 10, 11]
 options = default_user_ids + ["Other"]
 
 # Выбор из списка
@@ -344,6 +496,7 @@ if st.button("🔁 Run Calculation"):
 
     # ========== 2. Red/Blue Lines Only ==========
     st.subheader("🔵 Red/Blue Net Dep & Exp Decay")
+
     fig2, ax = plt.subplots(figsize=(14, 5))
     if show_true_blue:
         ax.plot(true_model['date'], true_model['blue'], c='blue', linestyle='--', label='Net Dep Blue', linewidth=LINE_WIDTH+2)
@@ -352,6 +505,40 @@ if st.button("🔁 Run Calculation"):
         ax.plot(true_model['date'], true_model['red'], c='red', linestyle='--', label='Net Dep Red', linewidth=LINE_WIDTH)
     if show_exp_blue:
         ax.plot(exp_model['date'], exp_model['blue'], c='blue', label='Exp Decay Blue', linewidth=LINE_WIDTH)
+        local_max = simple_local_maxima(exp_model, column='blue')
+        ax.scatter(
+            local_max['date'],
+            local_max['local_max'],
+            c='red',
+            marker='*',
+            s=200,  # Размер звезды (можно увеличить)
+            label='Local Maximum'
+        )
+    if show_exp_red:
+        #pass
+        ax.plot(exp_model['date'], exp_model['red'], c='red', label='Exp Decay Red', linewidth=LINE_WIDTH)
+    ax.set_title("Net Dep & Exp Decay Lines")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Value")
+    ax.legend()
+    ax.grid(True)
+    st.pyplot(fig2)
+
+        # ========== 2. Red/Blue Lines Only ==========
+    st.subheader("🔵 Red/Blue Net Dep & Exp Decay")
+
+    fig2, ax = plt.subplots(figsize=(14, 5))
+    if show_exp_blue:
+        ax.plot(exp_model['date'], exp_model['blue'], c='blue', label='Exp Decay Blue', linewidth=LINE_WIDTH)
+        local_max = simple_local_maxima(exp_model, column='blue')
+        ax.scatter(
+            local_max['date'],
+            local_max['local_max'],
+            c='red',
+            marker='*',
+            s=200,  # Размер звезды (можно увеличить)
+            label='Local Maximum'
+        )
     if show_exp_red:
         #pass
         ax.plot(exp_model['date'], exp_model['red'], c='red', label='Exp Decay Red', linewidth=LINE_WIDTH)
